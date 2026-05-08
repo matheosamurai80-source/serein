@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Serein — Découvrez vos pertes invisibles</title>
+<meta name="description" content="Serein détecte vos abonnements oubliés et dépenses invisibles. 3 minutes. Sans connexion bancaire.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<div id="topbar">
+  <div class="topbar-logo"><span class="logo-pulse"></span>Serein</div>
+  <span class="topbar-step" id="topbar-step">Étape 1 / 5</span>
+  <button class="topbar-back hidden" id="back-btn" onclick="goBack()">← Retour</button>
+</div>
+
+<!-- ═══ SCREEN 1 — LANDING ═══ -->
+<div class="screen active" id="screen-1">
+  <div class="screen-body">
+    <div class="hero-badge">
+      <span class="badge-live"></span>
+      4,7 abonnements oubliés en moyenne par foyer
+    </div>
+    <div class="eyebrow">Révélateur de pertes invisibles</div>
+    <h1 class="display">
+      Vous payez pour<br>des choses que vous<br><em>n'utilisez plus.</em>
+    </h1>
+    <p class="lead">Serein détecte vos abonnements oubliés et vos dépenses invisibles.</p>
+    <p class="lead-em">Et personne ne vous prévient.</p>
+    <div class="btn-stack">
+      <button class="btn btn-primary"   onclick="goTo(2)">Découvrir ce que je perds →</button>
+      <button class="btn btn-secondary" onclick="goTo(2)">📄 Analyser sans connexion bancaire</button>
+      <p class="btn-note">Gratuit · 3 minutes · Aucune connexion requise</p>
+    </div>
+    <div class="trust-strip">
+      <span class="trust-pill"><span class="dot"></span>Lecture seule</span>
+      <span class="trust-pill"><span class="dot"></span>Données en France</span>
+      <span class="trust-pill"><span class="dot"></span>0 commission cachée</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 2 — QUESTION ═══ -->
+<div class="screen" id="screen-2">
+  <div class="screen-body">
+    <div class="eyebrow">Étape 1 / 2</div>
+    <div class="q-wrap">
+      <p class="q-meta">Une seule question</p>
+      <h2 class="q-title">
+        Combien d'abonnements<br>pensez-vous avoir <em>actuellement ?</em>
+      </h2>
+      <div class="choices" id="choices">
+        <button class="choice" onclick="selectChoice(this,2,'0–3')" data-count="2">
+          <span class="choice-val">0–3</span>
+          <span class="choice-tag">abonnements</span>
+        </button>
+        <button class="choice" onclick="selectChoice(this,5,'4–6')" data-count="5">
+          <span class="choice-val">4–6</span>
+          <span class="choice-tag">abonnements</span>
+        </button>
+        <button class="choice" onclick="selectChoice(this,9,'7+')" data-count="9">
+          <span class="choice-val">7+</span>
+          <span class="choice-tag">abonnements</span>
+        </button>
+      </div>
+    </div>
+    <div class="btn-stack">
+      <button class="btn btn-disabled" id="btn-step2" onclick="goTo(3)">Voir mon estimation →</button>
+      <p class="btn-note">Aucune donnée collectée à cette étape</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3 — SIMULATION ═══ -->
+<div class="screen" id="screen-3">
+  <div class="screen-body">
+    <div class="eyebrow">Votre estimation personnalisée</div>
+    <div class="headline" style="margin-bottom:24px">
+      Ce que Serein trouve<br>en <em>3 minutes.</em>
+    </div>
+    <div class="sim-context">
+      <p class="sim-context-label">Basé sur votre réponse</p>
+      <p class="sim-context-val" id="sim-context-text">—</p>
+    </div>
+    <div class="scan-card">
+      <div class="scan-row">
+        <span class="scan-label">Abonnements estimés</span>
+        <span class="scan-val" id="sim-total">—</span>
+      </div>
+      <div class="scan-row">
+        <span class="scan-label">Dont probablement inutilisés</span>
+        <span class="scan-val">
+          <span id="sim-unused">—</span>
+          <span class="badge-pill badge-red" id="sim-unused-badge"></span>
+        </span>
+      </div>
+      <div class="scan-row">
+        <span class="scan-label">Coût moyen / abonnement oublié</span>
+        <span class="scan-val" style="color:var(--tm)">11,40 €/mois</span>
+      </div>
+      <div class="scan-row">
+        <span class="scan-label">Hausses non remarquées (est.)</span>
+        <span class="scan-val">
+          <span id="sim-hikes">—</span>
+          <span class="badge-pill badge-amber">Invisible</span>
+        </span>
+      </div>
+    </div>
+    <div class="loss-card">
+      <p class="loss-label">Vous perdez probablement</p>
+      <div class="loss-amount" id="loss-annual">—</div>
+      <p class="loss-sub" id="loss-detail">— / mois · — / an</p>
+    </div>
+    <div class="btn-stack">
+      <button class="btn btn-primary"   onclick="goTo(4)">Reprendre le contrôle →</button>
+      <button class="btn btn-secondary" onclick="goTo(4)">📄 Commencer avec un relevé PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 4 — REASSURANCE ═══ -->
+<div class="screen" id="screen-4">
+  <div class="screen-body">
+    <div class="eyebrow">Sécurité & Confiance</div>
+    <h2 class="headline" style="margin-bottom:24px">
+      Votre banque reste<br><em>entièrement la vôtre.</em>
+    </h2>
+    <div class="dsp2-card">
+      <p class="dsp2-title">Ce que la connexion DSP2 signifie concrètement</p>
+      <div class="dsp2-items">
+        <div class="dsp2-item">
+          <span class="dsp2-icon">✓</span>
+          <span><strong>Lecture seule</strong> — Serein lit vos transactions. Aucun virement possible. Techniquement impossible.</span>
+        </div>
+        <div class="dsp2-item">
+          <span class="dsp2-icon">✓</span>
+          <span><strong>Norme Banque de France</strong> — connexion régulée DSP2, gérée par Powens (agréé ACPR).</span>
+        </div>
+        <div class="dsp2-item">
+          <span class="dsp2-icon">✓</span>
+          <span><strong>Révocable en 1 clic</strong> — vous déconnectez votre banque à tout moment depuis l'app.</span>
+        </div>
+        <div class="dsp2-item">
+          <span class="dsp2-icon">✓</span>
+          <span><strong>Données en France</strong> — hébergées OVH Roubaix, chiffrées, jamais revendues.</span>
+        </div>
+      </div>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-tile">
+        <span class="trust-tile-icon">🚫</span>
+        <div class="trust-tile-title">Zéro commission</div>
+        <p class="trust-tile-text">Serein ne perçoit aucune commission des services qu'il analyse.</p>
+      </div>
+      <div class="trust-tile">
+        <span class="trust-tile-icon">🔌</span>
+        <div class="trust-tile-title">Déconnexion libre</div>
+        <p class="trust-tile-text">Accès révocable immédiatement. Pas de formulaire.</p>
+      </div>
+      <div class="trust-tile">
+        <span class="trust-tile-icon">🇫🇷</span>
+        <div class="trust-tile-title">RGPD conforme</div>
+        <p class="trust-tile-text">Données françaises. Audit annuel. Jamais partagées.</p>
+      </div>
+      <div class="trust-tile">
+        <span class="trust-tile-icon">✋</span>
+        <div class="trust-tile-title">Vous décidez</div>
+        <p class="trust-tile-text">Aucune action sans votre accord explicite.</p>
+      </div>
+    </div>
+    <div class="no-bank-note">
+      Vous préférez ne pas connecter votre banque ?
+      <strong>Importez simplement un relevé PDF.</strong> Serein l'analyse en 60 secondes.
+    </div>
+    <div class="btn-stack">
+      <button class="btn btn-primary" onclick="goTo(5)">J'ai compris, je continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 5 — CONVERSION ═══ -->
+<div class="screen" id="screen-5">
+  <div class="screen-body">
+
+    <div class="conversion-shield">🛡️</div>
+    <div class="eyebrow">Prêt à commencer</div>
+    <h2 class="headline" style="margin-bottom:8px">
+      Serein veille.<br><em>Vous économisez.</em>
+    </h2>
+    <p class="lead" style="margin-bottom:24px">Sans effort. Sans risque. En silence.</p>
+
+    <div class="saving-summary">
+      <div>
+        <p class="saving-label">Votre potentiel d'économie</p>
+        <div class="saving-val" id="final-saving">—</div>
+        <p class="saving-per">par an · estimation personnalisée</p>
+      </div>
+      <div style="text-align:right">
+        <p style="font-size:11px;color:var(--td);font-family:'Geist Mono',monospace;letter-spacing:.05em;line-height:1.7">
+          Serein Actif<br>
+          <strong style="color:var(--sage-lt);font-size:14px">3,99 €/mois</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="email-block">
+      <label class="email-label" for="email-input">
+        Votre e-mail pour recevoir votre analyse
+      </label>
+      <input
+        id="email-input"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        placeholder="vous@exemple.fr"
+        class="email-input"
+      />
+    </div>
+
+    <!-- CHOIX -->
+    <div class="conv-options">
+      <button class="conv-option featured" onclick="handleConversion(event,'bank')">
+        <div class="conv-option-icon ico-bank">🏦</div>
+        <div class="conv-option-body">
+          <div class="conv-option-title">Connecter ma banque</div>
+          <div class="conv-option-desc">Détection automatique · Alertes en temps réel · Analyse complète</div>
+        </div>
+        <span class="conv-option-badge">Recommandé</span>
+      </button>
+      <button class="conv-option" onclick="handleConversion(event,'pdf')">
+        <div class="conv-option-icon ico-pdf">📄</div>
+        <div class="conv-option-body">
+          <div class="conv-option-title">Importer un relevé PDF</div>
+          <div class="conv-option-desc">Sans connexion bancaire · Analyse en 60 secondes</div>
+        </div>
+        <span class="conv-option-arrow">→</span>
+      </button>
+    </div>
+
+    <!-- PDF ZONE (cachée par défaut) -->
+    <div id="pdf-upload-zone" class="pdf-upload-zone hidden">
+      <label for="pdf-file-input" class="pdf-upload-label">
+        <span class="pdf-upload-icon">📄</span>
+        <span class="pdf-upload-text">
+          Glissez votre relevé ici<br>
+          <small>ou cliquez pour sélectionner · PDF uniquement · max 10 Mo</small>
+        </span>
+        <input id="pdf-file-input" type="file" accept=".pdf,application/pdf" />
+      </label>
+      <p id="upload-status" class="upload-status"></p>
+    </div>
+
+    <p class="conv-guarantee">
+      Analyse gratuite · Résiliation Serein en 1 clic · Aucun engagement
+    </p>
+
+  </div>
+</div>
+
+<!-- STICKY MOBILE -->
+<div id="sticky-bar">
+  <button id="sticky-btn" onclick="stickyAction()">
+    <span id="sticky-text">Commencer →</span>
+  </button>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
