@@ -3,7 +3,7 @@
 /* ════════════════════════════════════════
    SUPABASE CONFIG
 ════════════════════════════════════════ */
-const SUPA_URL    = 'https://oujdbevbgqntkouvsmss.supabase.co';
+const SUPA_URL    = 'https://oujdbevbgqntkousvsms.supabase.co';
 const SUPA_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91amRiZXZiZ3FudGtvdXN2c21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NTg3NTYsImV4cCI6MjA5MzMzNDc1Nn0.fKAlZbRI-L10rTmWwjLPIWXTYiEY9UVhNkLS_Q4sleE';
 const SUPA_BUCKET = 'pdfs';
 
@@ -36,17 +36,14 @@ const SIM = {
 function goTo(n) {
   if (n < 1 || n > 5) return;
   if (n === 3 && state.estimatedSubscriptions === 0) return;
-
   const curr = document.getElementById('screen-' + state.step);
   const next = document.getElementById('screen-' + n);
   if (!curr || !next) return;
-
   curr.classList.remove('active');
   if (n === 3) buildSim();
   if (n === 5) buildFinal();
   void next.offsetWidth;
   next.classList.add('active');
-
   const body = next.querySelector('.screen-body');
   if (body) {
     body.classList.remove('entering');
@@ -54,7 +51,6 @@ function goTo(n) {
     body.classList.add('entering');
     setTimeout(() => body.classList.remove('entering'), 900);
   }
-
   state.step = n;
   updateChrome();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -71,18 +67,15 @@ function updateChrome() {
   const n = state.step;
   const fill = document.getElementById('progress-fill');
   if (fill) fill.style.width = ((n - 1) / 4 * 100) + '%';
-
   const stepEl = document.getElementById('topbar-step');
   if (stepEl) stepEl.textContent = 'Étape ' + n + ' / 5';
-
   const back = document.getElementById('back-btn');
   if (back) back.classList.toggle('hidden', n === 1);
-
   updateSticky();
 }
 
 function updateSticky() {
-  const labels = {
+  const map = {
     1: 'Découvrir ce que je perds →',
     2: state.estimatedSubscriptions > 0 ? 'Voir mon estimation →' : 'Choisissez une option',
     3: 'Reprendre le contrôle →',
@@ -90,7 +83,7 @@ function updateSticky() {
     5: 'Commencer mon analyse →'
   };
   const el = document.getElementById('sticky-text');
-  if (el) el.textContent = labels[state.step] || 'Continuer →';
+  if (el) el.textContent = map[state.step] || 'Continuer →';
 }
 
 function stickyAction() {
@@ -113,7 +106,6 @@ function selectChoice(el, count, label) {
   el.classList.add('selected');
   state.estimatedSubscriptions = count;
   state.choiceLabel = label;
-
   const btn = document.getElementById('btn-step2');
   if (btn) {
     btn.classList.remove('btn-disabled');
@@ -132,7 +124,6 @@ function buildSim() {
   state.hikesCost       = d.hikesCost;
   state.monthlyLoss     = d.monthlyLoss;
   state.annualLoss      = d.annualLoss;
-
   setText('sim-context-text',
     'Vous avez indiqué environ <strong>' + state.choiceLabel + '</strong>. ' +
     "Voici l'estimation Serein basée sur les moyennes françaises."
@@ -141,7 +132,6 @@ function buildSim() {
   setText('sim-unused',       d.unused + ' abonnement' + (d.unused > 1 ? 's' : ''));
   setText('sim-unused-badge', d.unused + ' oublié'     + (d.unused > 1 ? 's' : ''));
   setText('sim-hikes',        '+' + d.hikesCost + ' €/mois');
-
   const annualEl = document.getElementById('loss-annual');
   if (annualEl) animateCount(annualEl, d.annualLoss, ' € / an', 45, 28);
   setText('loss-detail', '≈ ' + d.monthlyLoss + ' € / mois  ·  ' + d.annualLoss + ' € / an');
@@ -195,7 +185,10 @@ async function supaInsertLead(email, choice) {
       annual_loss:             state.annualLoss
     })
   });
-  if (!res.ok) throw new Error('leads insert: ' + await res.text());
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('leads insert: ' + err);
+  }
   const rows = await res.json();
   return rows[0];
 }
@@ -208,15 +201,23 @@ async function supaInsertScan(leadId, filePath) {
       'apikey':        SUPA_KEY,
       'Authorization': 'Bearer ' + SUPA_KEY
     },
-    body: JSON.stringify({ lead_id: leadId, file_path: filePath, status: 'pending' })
+    body: JSON.stringify({
+      lead_id:   leadId,
+      file_path: filePath,
+      status:    'pending'
+    })
   });
-  if (!res.ok) throw new Error('pdf_scans insert: ' + await res.text());
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('pdf_scans insert: ' + err);
+  }
 }
 
 async function supaUploadPdf(leadId, file) {
   const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = leadId + '/' + Date.now() + '_' + safe;
-  const res = await fetch(SUPA_URL + '/storage/v1/object/' + SUPA_BUCKET + '/' + path, {
+  const res = await fetch(
+    SUPA_URL + '/storage/v1/object/' + SUPA_BUCKET + '/' + path, {
     method: 'POST',
     headers: {
       'apikey':        SUPA_KEY,
@@ -226,7 +227,10 @@ async function supaUploadPdf(leadId, file) {
     },
     body: file
   });
-  if (!res.ok) throw new Error('storage upload: ' + await res.text());
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('storage upload: ' + err);
+  }
   return path;
 }
 
@@ -240,17 +244,14 @@ async function handleConversion(event, type) {
     showToast('✉️ Entrez votre adresse e-mail pour continuer');
     return;
   }
-
   const btn = event.currentTarget;
   const origHTML = btn.innerHTML;
   setLoading(btn, true);
-
   try {
     if (!state.leadId) {
       const lead = await supaInsertLead(email, type);
       state.leadId = lead.id;
     }
-
     if (type === 'bank') {
       setLoading(btn, false, origHTML);
       showToast('🏦 Connexion bancaire — bientôt disponible. Vous serez notifié !');
@@ -259,7 +260,7 @@ async function handleConversion(event, type) {
       showPdfZone();
     }
   } catch (err) {
-    console.error(err);
+    console.error('Serein error:', err);
     setLoading(btn, false, origHTML);
     showToast('⚠️ Une erreur est survenue. Réessayez dans un instant.');
   }
@@ -283,7 +284,6 @@ function showPdfZone() {
   if (!zone) return;
   zone.classList.remove('hidden');
   setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-
   const input = document.getElementById('pdf-file-input');
   if (input && !input._bound) {
     input._bound = true;
@@ -291,7 +291,6 @@ function showPdfZone() {
       if (input.files && input.files[0]) handlePdfFile(input.files[0]);
     });
   }
-
   if (!zone._ddBound) {
     zone._ddBound = true;
     zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragover'); });
@@ -324,7 +323,7 @@ async function handlePdfFile(file) {
     setUploadStatus('✓ ' + file.name + ' reçu — analyse en cours…', 'ok');
     showToast('📄 Relevé reçu ! Vous recevrez votre analyse par email.');
   } catch (err) {
-    console.error(err);
+    console.error('PDF upload error:', err);
     setUploadStatus('Échec envoi. Vérifiez votre connexion.', 'err');
   }
 }
