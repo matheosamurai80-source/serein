@@ -166,7 +166,9 @@ function shakeEmail() {
 }
 
 /* ════════════════════════════════════════
-   SUPABASE HELPERS
+   SUPABASE — INSERT LEAD
+   Prefer: return=minimal évite le SELECT
+   qui était bloqué par RLS
 ════════════════════════════════════════ */
 async function supaInsertLead(email, choice) {
   const res = await fetch(SUPA_URL + '/rest/v1/leads', {
@@ -175,34 +177,46 @@ async function supaInsertLead(email, choice) {
       'Content-Type':  'application/json',
       'apikey':        SUPA_KEY,
       'Authorization': 'Bearer ' + SUPA_KEY,
-      'Prefer':        'return=representation'
+      'Prefer':        'return=minimal'
     },
     body: JSON.stringify({
-      email,
-      choice,
+      email:                   email,
+      choice:                  choice,
       estimated_subscriptions: state.estimatedSubscriptions,
       monthly_loss:            state.monthlyLoss,
       annual_loss:             state.annualLoss
     })
   });
+
   if (!res.ok) {
     const err = await res.text();
     throw new Error('leads insert: ' + err);
   }
-  const rows = await res.json();
-  return rows[0];
+
+  /* Avec return=minimal Supabase retourne 201 sans body.
+     On génère un ID temporaire côté client pour lier le PDF. */
+  const locationHeader = res.headers.get('location') || '';
+  const match = locationHeader.match(/id=eq\.([^&]+)/);
+  if (match) return { id: match[1] };
+
+  /* Fallback : ID pseudo-unique pour la session */
+  return { id: 'tmp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) };
 }
 
+/* ════════════════════════════════════════
+   SUPABASE — INSERT PDF SCAN
+════════════════════════════════════════ */
 async function supaInsertScan(leadId, filePath) {
   const res = await fetch(SUPA_URL + '/rest/v1/pdf_scans', {
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
       'apikey':        SUPA_KEY,
-      'Authorization': 'Bearer ' + SUPA_KEY
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Prefer':        'return=minimal'
     },
     body: JSON.stringify({
-      lead_id:   leadId,
+      lead_id:   leadId.startsWith('tmp_') ? null : leadId,
       file_path: filePath,
       status:    'pending'
     })
@@ -213,6 +227,9 @@ async function supaInsertScan(leadId, filePath) {
   }
 }
 
+/* ════════════════════════════════════════
+   SUPABASE — UPLOAD PDF
+════════════════════════════════════════ */
 async function supaUploadPdf(leadId, file) {
   const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = leadId + '/' + Date.now() + '_' + safe;
@@ -254,7 +271,7 @@ async function handleConversion(event, type) {
     }
     if (type === 'bank') {
       setLoading(btn, false, origHTML);
-      showToast('🏦 Connexion bancaire — bientôt disponible. Vous serez notifié !');
+      showToast('🏦 Inscription confirmée ! Connexion bancaire bientôt disponible.');
     } else {
       setLoading(btn, false, origHTML);
       showPdfZone();
